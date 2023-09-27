@@ -16,6 +16,7 @@ import { useUrlPosition } from "../hooks/useUrlPosition";
 
 function Map() {
     const { cities } = useCities();
+    const navigate = useNavigate();
     const [mapPosition, setMapPosition] = useState([40, 0]);
     const {
         isLoading: isLoadingPosition,
@@ -35,9 +36,9 @@ function Map() {
                 return;
             }
 
-            setMapPosition([lat, lng]);
+            navigate(`form?lat=${lat}&lng=${lng}`);
         },
-        [geolocationPosition]
+        [geolocationPosition, navigate]
     );
 
     useEffect(
@@ -50,9 +51,13 @@ function Map() {
         [lat, lng]
     );
 
+    const isOwnLocation =
+        geolocationPosition?.lat === Number(lat) &&
+        geolocationPosition?.lng === Number(lng);
+
     return (
         <div className={styles.mapContainer}>
-            {!geolocationPosition && (
+            {(!geolocationPosition || !isOwnLocation) && (
                 <Button type="position" onClick={getLocation}>
                     {isLoadingPosition ? "Loading..." : "Use your position"}
                 </Button>
@@ -79,16 +84,22 @@ function Map() {
                         </Popup>
                     </Marker>
                 ))}
-                <ChangeCenter position={mapPosition} />
+                <ChangeCenter
+                    position={mapPosition}
+                    isOwnLocation={isOwnLocation}
+                />
                 <DetectClick />
             </MapContainer>
         </div>
     );
 }
 
-function ChangeCenter({ position }) {
+function ChangeCenter({ position, isOwnLocation }) {
     const map = useMap();
     map.setView(position);
+    if (isOwnLocation) {
+        map.setZoom(10);
+    }
     return null;
 }
 
