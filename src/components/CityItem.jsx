@@ -15,7 +15,6 @@ function CityItem({ city }) {
 
     function handleDelete(e) {
         e.preventDefault();
-        console.log(e);
         deleteCity(id);
     }
 
